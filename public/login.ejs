@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+</head>
+<body>
+  <h2>Login</h2>
+  <form id="loginForm">
+    <input type="email" id="email" placeholder="Email" required><br>
+    <input type="password" id="password" placeholder="Password" required><br>
+    <button type="submit">Login</button>
+  </form>
+  <p id="message"></p>
+  <button id="profileBtn" style="display:none;">View Profile (Protected)</button>
+  <a href="/register.html">Go to Register</a>
+
+  <script>
+    let token = null;
+
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      document.getElementById("message").innerText = data.message || data.error;
+
+      if (data.token) {
+        token = data.token;
+        document.getElementById("profileBtn").style.display = "block";
+      }
+    });
+
+    document.getElementById("profileBtn").addEventListener("click", async () => {
+      const res = await fetch("/api/profile", {
+        headers: { Authorization: "Bearer " + token }
+      });
+      const data = await res.json();
+      alert(JSON.stringify(data, null, 2));
+    });
+  </script>
+</body>
+</html>

@@ -25,6 +25,7 @@ services:
       - DB_NAME=auth_db
       - DB_PORT=5432
       - PORT=3000
+      - JWT_SECRET=A/cbpOhWfpBtYAcHystIVPW7C/BJ+Lix2Uxy9Ft2eL8=
     depends_on:
       - db
     ports:
