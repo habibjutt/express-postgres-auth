@@ -2,11 +2,14 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { Pool } = require("pg");
+const cookieParser = require("cookie-parser");
 const path = require("path");
 require("dotenv").config();
 
 const app = express();
-app.use(express.json());
+app.set("view engine", "ejs");
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 const pool = new Pool({
@@ -30,7 +33,33 @@ const pool = new Pool({
   client.release();
 })();
 
-// Register route
+// Middleware to check JWT
+function verifyToken(req, res, next) {
+  const token = req.cookies.token;
+  if (!token) return res.redirect("/login");
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) return res.redirect("/login");
+    req.user = user;
+    next();
+  });
+}
+
+// Home page
+app.get("/", (req, res) => {
+  const token = req.cookies.token;
+  if (!token) return res.render("index", { user: null });
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    res.render("index", { user: err ? null : user });
+  });
+});
+
+// Register routes
+app.get("/register", (req, res) => {
+  res.render("register", { message: null });
+});
+
 app.post("/register", async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -39,56 +68,56 @@ app.post("/register", async (req, res) => {
       email,
       hashedPassword,
     ]);
-    res.status(201).json({ message: "User registered successfully" });
+    res.render("login", { message: "Registration successful! Please log in." });
   } catch (err) {
     console.error(err);
-    res.status(400).json({ error: "User already exists or invalid data" });
+    res.render("register", { message: "User already exists or invalid data." });
   }
 });
 
-// Login route
+// Login routes
+app.get("/login", (req, res) => {
+  res.render("login", { message: null });
+});
+
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
   try {
     const result = await pool.query("SELECT * FROM users WHERE email = $1", [
       email,
     ]);
-    if (result.rows.length === 0) {
-      return res.status(401).json({ error: "Invalid credentials" });
-    }
+    if (result.rows.length === 0)
+      return res.render("login", { message: "Invalid credentials" });
 
     const user = result.rows[0];
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(401).json({ error: "Invalid credentials" });
+    if (!isMatch)
+      return res.render("login", { message: "Invalid credentials" });
 
-	const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign(
+      { id: user.id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
 
-    res.json({ message: "Login successful", token });
+    res.cookie("token", token, { httpOnly: true });
+    res.redirect("/profile");
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Server error" });
+    res.render("login", { message: "Server error" });
   }
 });
 
-// Protected route
-app.get("/api/profile", verifyToken, (req, res) => {
-  res.json({ message: "Protected route accessed!", user: req.user });
+// Profile (protected)
+app.get("/profile", verifyToken, (req, res) => {
+  res.render("profile", { user: req.user });
 });
 
-// JWT verification middleware
-function verifyToken(req, res, next) {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-  if (!token) return res.status(403).json({ error: "No token provided" });
-
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.status(403).json({ error: "Invalid token" });
-    req.user = user;
-    next();
-  });
-}
+// Logout
+app.get("/logout", (req, res) => {
+  res.clearCookie("token");
+  res.redirect("/");
+});
 
 app.listen(process.env.PORT, () =>
   console.log(`Server running on port ${process.env.PORT}`)
