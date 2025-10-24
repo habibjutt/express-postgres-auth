@@ -4,13 +4,10 @@ const jwt = require("jsonwebtoken");
 const { Pool } = require("pg");
 const cookieParser = require("cookie-parser");
 const path = require("path");
-const { fileURLToPath } = require("url");
-// const { expressLayouts } = require("express-ejs-layouts");
 const expressLayouts = require("express-ejs-layouts");
 require("dotenv").config();
 
 const app = express();
-
 
 // Set EJS as the template engine
 app.set("view engine", "ejs");
@@ -26,9 +23,6 @@ app.use(cookieParser());
 
 // Serve static files (for CSS, JS, etc.)
 app.use(express.static(path.join(__dirname, "public")));
-
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = path.dirname(__filename);
 
 const pool = new Pool({
 	host: process.env.DB_HOST,
@@ -75,7 +69,6 @@ app.get("/", (req, res) => {
 
 // Register routes
 app.get("/register", (req, res) => {
-	// res.render("register", { message: null });
 	res.render("register", { title: "Register Page", message: null });
 });
 
@@ -102,7 +95,6 @@ app.post("/register", async (req, res) => {
 
 // Login routes
 app.get("/login", (req, res) => {
-	// res.render("login", { message: null });
 	res.render("login", { title: "Login Page", message: null });
 });
 
