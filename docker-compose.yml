@@ -6,9 +6,9 @@ services:
     container_name: postgres_db
     restart: always
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: auth_db
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
       - "8000:5432"
     volumes:
@@ -19,18 +19,33 @@ services:
     container_name: express_app
     restart: always
     environment:
-      - DB_HOST=db
-      - DB_USER=postgres
-      - DB_PASSWORD=password
-      - DB_NAME=auth_db
-      - DB_PORT=5432
-      - PORT=3000
-      - JWT_SECRET=A/cbpOhWfpBtYAcHystIVPW7C/BJ+Lix2Uxy9Ft2eL8=
+      - DB_HOST=${DB_HOST}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_PORT=${DB_PORT}
+      - PORT=${PORT}
+      - JWT_SECRET=${JWT_SECRET}
     depends_on:
       - db
     ports:
       - "8080:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
     command: ["npm", "start"]
+
+  pgadmin:
+    image: dpage/pgadmin4:8
+    container_name: pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PG_ADMIN}
+      PGADMIN_DEFAULT_PASSWORD: ${PG_ADMIN_PASSWORD}
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
 
 volumes:
   pgdata:

@@ -1,19 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Home</title>
-</head>
-<body>
-  <h1>Welcome to JWT Auth Demo</h1>
 
-  <% if (user) { %>
-    <p>Hello, <%= user.email %>!</p>
-    <a href="/profile">Profile</a> |
-    <a href="/logout">Logout</a>
-  <% } else { %>
-    <a href="/login">Login</a> |
-    <a href="/register">Register</a>
-  <% } %>
-</body>
-</html>
+		<h1>Welcome to JWT Auth Demo</h1>
+
+		<% if (user) { %>
+		<p>Hello, <%= user.email %>!</p>
+		<a href="/profile">Profile</a> |
+		<a href="/logout">Logout</a>
+		<% } else { %>
+		<a href="/login">Login</a> |
+		<a href="/register">Register</a>
+		<% } %>
