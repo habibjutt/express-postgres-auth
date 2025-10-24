@@ -1,0 +1,73 @@
+# Node dependencies
+node_modules/
+# Optional npm cache
+.npm/
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+# Runtime data
+pids/
+*.pid
+*.seed
+# Build outputs
+dist/
+build/
+coverage/
+.nyc_output/
+lib/
+esm/
+# Environment variables
+.env
+.env.*.local
+.env.local
+.env.test
+# Editor directories and files
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+*.iml
+# OS files
+.DS_Store
+Thumbs.db
+# Editor swap / backup files
+*~
+.*.swp
+*.swp
+# Cache
+.cache/
+.parcel-cache/
+.next/
+# TypeScript
+*.tsbuildinfo
+# ESLint cache
+.eslintcache
+# Parcel / Vite / other tool caches
+.cache/
+# Docker / Compose overrides / local Docker volumes
+docker-compose.override.yml
+docker-compose.*.yml
+**/pgdata/
+pgdata/
+# Postgres / DB runtime files
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+*.sql.gz
+.psql_history
+.pgpass
+# Test artifacts
+coverage/
+jest.cache
+# Sensitive or local config
+local.env
+.envrc
+# Misc
+public/uploads/
+uploads/
+# End of file
