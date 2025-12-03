@@ -17,7 +17,6 @@ app.set("views", path.join(__dirname, "views"));
 app.use(expressLayouts);
 app.set("layout", "layout"); // default layout file: views/layout.ejs
 
-
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
@@ -82,13 +81,13 @@ app.post("/register", async (req, res) => {
 		);
 		res.render("login", {
 			message: "Registration successful! Please log in.",
-			title: "Login Page"
+			title: "Login Page",
 		});
 	} catch (err) {
 		console.error(err);
 		res.render("register", {
-			message: "User already exists or invalid data.",
-			title: "Register Page"
+			message: "Registration failed. Please try again.",
+			title: "Register Page",
 		});
 	}
 });
@@ -106,12 +105,18 @@ app.post("/login", async (req, res) => {
 			[email]
 		);
 		if (result.rows.length === 0)
-			return res.render("login", { message: "Invalid credentials", title: "Login Page" });
+			return res.render("login", {
+				message: "Invalid credentials",
+				title: "Login Page",
+			});
 
 		const user = result.rows[0];
 		const isMatch = await bcrypt.compare(password, user.password);
 		if (!isMatch)
-			return res.render("login", { message: "Invalid credentials", title: "Login Page" });
+			return res.render("login", {
+				message: "Invalid credentials",
+				title: "Login Page",
+			});
 
 		const token = jwt.sign(
 			{ id: user.id, email: user.email },
@@ -119,7 +124,12 @@ app.post("/login", async (req, res) => {
 			{ expiresIn: "1h" }
 		);
 
-		res.cookie("token", token, { httpOnly: true });
+		res.cookie("token", token, {
+			httpOnly: true,
+			secure: process.env.NODE_ENV === "production", // HTTPS only in prod
+			sameSite: "strict", // CSRF protection
+			maxAge: 3600000, // 1 hour in ms
+		});
 		res.redirect("/profile");
 	} catch (err) {
 		console.error(err);
